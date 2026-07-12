@@ -10,8 +10,8 @@ Thumbs.db
 
 # Env variants (keep example)
 .env*
-!.env.example
 .env.*
+!.env.example
 
 # Keys / certs
 *.pem
@@ -257,3 +257,7 @@ eval_results/
 
 # Raw data
 data/raw/
+
+# Chroma addition
+chroma_data/
+*.pyc
