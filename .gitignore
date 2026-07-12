@@ -254,3 +254,6 @@ models/
 logs/
 eval_results/
 *.report.json
+
+# Raw data
+data/raw/
