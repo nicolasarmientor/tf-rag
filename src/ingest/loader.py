@@ -51,25 +51,23 @@ def parse_notebook_file(filepath: Path) -> Document:
 def load_documents(guide_root: Path = GUIDE_ROOT) -> list[Document]:
     documents = []
 
-    markdown_files = GUIDE_ROOT.rglob("*.md")
+    markdown_files = guide_root.rglob("*.md")
     for filepath in markdown_files:
         document = parse_markdown_file(filepath)
         documents.append(document)
 
-    notebook_files = GUIDE_ROOT.rglob("*.ipynb")
+    notebook_files = guide_root.rglob("*.ipynb")
     for filepath in notebook_files:
         document = parse_notebook_file(filepath)
         documents.append(document)
     
     return documents
 
-
-
 if __name__ == "__main__":
     test = load_documents()
 
-    print(f"Loaded {len(test)} documents")
+    print(f"\nLoaded {len(test)} documents")
     print("---")
     print(f"Sample title: {test[0].title}")
     print(f"Sample source_path: {test[0].source_path}")
-    print(f"Sample text (first 200 chars): {test[0].text[:200]}")
+    print(f"Sample text (first 200 chars): {test[0].text[:200]}\n")
