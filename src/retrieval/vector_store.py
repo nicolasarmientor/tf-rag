@@ -1,5 +1,5 @@
+
 import chromadb
-import sys
 from src.ingest.loader import load_documents
 from src.ingest.chunker import Chunk, chunk_documents
 from src.ingest.embed import embed_chunks, model
