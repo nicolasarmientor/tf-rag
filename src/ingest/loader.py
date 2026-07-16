@@ -64,10 +64,10 @@ def load_documents(guide_root: Path = GUIDE_ROOT) -> list[Document]:
     return documents
 
 if __name__ == "__main__":
-    test = load_documents()
+    docs = load_documents()
 
-    print(f"\nLoaded {len(test)} documents")
+    print(f"\nLoaded {len(docs)} documents")
     print("---")
-    print(f"Sample title: {test[0].title}")
-    print(f"Sample source_path: {test[0].source_path}")
-    print(f"Sample text (first 200 chars): {test[0].text[:200]}\n")
+    print(f"Sample title: {docs[0].title}")
+    print(f"Sample source_path: {docs[0].source_path}")
+    print(f"Sample text (first 200 chars): {docs[0].text[:200]}\n")
