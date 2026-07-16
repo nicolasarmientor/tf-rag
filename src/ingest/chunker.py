@@ -1,7 +1,7 @@
 
 import re
 import tiktoken
-from loader import Document, load_documents
+from src.ingest.loader import Document, load_documents
 from dataclasses import dataclass
 
 TARGET_CHUNK_TOKENS = 400

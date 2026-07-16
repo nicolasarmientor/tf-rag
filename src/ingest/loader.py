@@ -13,11 +13,18 @@ class Document:
     title: str
     source_path: str
 
+def extract_title(text: str, fallback: str) -> str:
+    code_pattern = r"```.*?\n.*?```"
+    text_without_code = re.sub(code_pattern, "", text, flags=re.DOTALL)
+
+    match = re.search(r"^#\s+(.+)$", text_without_code, re.MULTILINE)
+    
+    return match.group(1).strip() if match else fallback
+
 def parse_markdown_file(filepath: Path) -> Document:
     raw_text = filepath.read_text(encoding="utf-8")
     
-    match = re.search(r"^#\s+(.+)$", raw_text, re.MULTILINE)
-    title = match.group(1).strip() if match else filepath.stem
+    title = extract_title(raw_text, filepath.stem)
 
     source_path = str(filepath.relative_to(GUIDE_ROOT))
 
@@ -41,8 +48,7 @@ def parse_notebook_file(filepath: Path) -> Document:
     
     complete_text = "\n\n".join(pieces)
 
-    match = re.search(r"^#\s+(.+)$", complete_text, re.MULTILINE)
-    title = match.group(1).strip() if match else filepath.stem
+    title = extract_title(complete_text, filepath.stem)
 
     source_path = str(filepath.relative_to(GUIDE_ROOT))
 
@@ -68,6 +74,11 @@ if __name__ == "__main__":
 
     print(f"\nLoaded {len(documents)} documents")
     print("---")
-    print(f"Sample title: {documents[0].title}")
-    print(f"Sample source_path: {documents[0].source_path}")
-    print(f"Sample text (first 200 chars): {documents[0].text[:200]}\n")
+
+    problem_files = ["intro_to_modules.ipynb", "migrate/migrating_estimator.ipynb"]
+    
+    for document in documents:
+        if document.source_path in problem_files:
+            print(f"Source: {document.source_path}")
+            print(f"Title: {document.title}")
+            print("---")

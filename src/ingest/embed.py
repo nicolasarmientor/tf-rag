@@ -1,7 +1,7 @@
 
 import sys
-from chunker import Chunk, chunk_documents
-from loader import load_documents
+from src.ingest.chunker import Chunk, chunk_documents
+from src.ingest.loader import load_documents
 from sentence_transformers import SentenceTransformer
 
 MODEL_NAME = "all-MiniLM-L6-v2"
