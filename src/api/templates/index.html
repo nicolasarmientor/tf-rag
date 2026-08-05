@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>TensorFlow Docs Assistant</h1>
+<form hx-post="/ask-ui" hx-target="#result">
+    <input type="text" name="question" placeholder="Ask a question about TensorFlow..." required>
+    <button type="submit">Ask</button>
+</form>
+<div id="result"></div>
+{% endblock %}

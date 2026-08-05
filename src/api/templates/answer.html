@@ -1,0 +1,10 @@
+<div class="answer-block">
+    <h3>Question: {{ question }}</h3>
+    <p>{{ answer }}</p>
+    <h4>Sources:</h4>
+    <ul>
+        {% for source in sources %}
+        <li>{{ source.title }} ({{ source.source_path }})</li>
+        {% endfor %}
+    </ul>
+</div>

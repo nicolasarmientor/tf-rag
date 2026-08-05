@@ -13,6 +13,7 @@ Rules:
 - If the context does not contain enough information to answer, say "I don't have enough information in the provided documentation to answer that".
 - When you answer, mention which source(s) you used, by their title.
 - Do not use any outside knowledge about TensorFlow beyond what is in the context.
+- Do not use markdown formatting (no #, **, bullet points with -, etc). Write plain sentences and pragraphs only.
 """
 
 def build_prompt(question: str, retrieved_chunks:list[dict]) -> str:
@@ -53,9 +54,13 @@ def generate_answer(question: str, retrieved_chunks: list[dict]) -> dict:
 
     answer_text = response.content[0].text
 
-    sources = [
-        {'title': chunk["title"], "source_path": chunk["source_path"]} for chunk in retrieved_chunks
-    ]
+    seen = set()
+    sources = []
+    for chunk in retrieved_chunks:
+        key = chunk["source_path"]
+        if key not in seen:
+            seen.add(key)
+            sources.append({'title': chunk["title"], "source_path": chunk["source_path"]})
 
     return {
         "answer": answer_text,
