@@ -1,10 +1,30 @@
-<div class="answer-block">
-    <h3>Question: {{ question }}</h3>
-    <p>{{ answer }}</p>
-    <h4>Sources:</h4>
-    <ul>
-        {% for source in sources %}
-        <li>{{ source.title }} ({{ source.source_path }})</li>
-        {% endfor %}
-    </ul>
+<div class="flex flex-col gap-4 w-full">
+    <div class="flex flex-row justify-end">
+        <div class="bg-[#1F1F26] border border-white/[0.07] rounded-[18px_18px_4px_18px] px-[18px] py-[13px] max-w-[75%]">
+            <div class="text-[15px] leading-[23px] text-[#ECECEF]">{{ question }}</div>
+        </div>
+    </div>
+
+    <div class="max-w-[90%] flex flex-col gap-3">
+        <div class="bg-white/[0.05] border border-white/[0.12] rounded-[18px_18px_18px_4px] backdrop-blur-md p-[22px]">
+            <div class="prose-answer text-[15px] leading-[25px] text-[#ECECEF] font-light">{{ answer|safe }}</div>
+        </div>
+
+        <div class="flex flex-row justify-between items-center flex-wrap gap-2">
+            <div class="flex flex-row gap-2 items-center flex-wrap">
+                <div class="text-[10.5px] text-[#74747F] font-mono tracking-widest">sources</div>
+                {% for source in sources %}
+                <div class="flex flex-row gap-1.5 items-center bg-white/[0.04] border border-white/[0.11] rounded-full px-[10px] py-[5px]">
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="#7E7E8A"><path d="M3.3 0.6c-.6 0-1 .3-1.3.7-.3.4-.4.7-.4 1v9c0 .3.1.6.4 1 .3.4.7.6 1.3.7h7.3c.6 0 1-.3 1.3-.7.3-.4.4-.7.4-1V4.6L9.6.7C9.3.4 9 .3 8.7.3H3.3z"></path></svg>
+                    <div class="text-[11px] text-[#A0A0AC] font-mono">{{ source.source_path }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="flex flex-row gap-[7px] items-center shrink-0">
+                <div class="text-[10.5px] text-[#63636D] font-mono tracking-wide">{{ model }}</div>
+                <div class="w-[2px] h-[2px] bg-[#4A4A54] rounded-full"></div>
+                <div class="text-[10.5px] text-[#74747F] font-mono tracking-wide">{{ total_tokens }} tokens</div>
+            </div>
+        </div>
+    </div>
 </div>

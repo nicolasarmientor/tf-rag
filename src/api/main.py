@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from src.retrieval.retriever import retrieve
 from src.generation.generator import generate_answer
 from src.api.schemas import AskRequest, AskResponse, SourceInfo
+from src.retrieval.vector_store import collection
 
 app = FastAPI()
 
@@ -14,7 +15,9 @@ app.mount("/static", StaticFiles(directory="src/api/static"), name="static")
 
 @app.get("/")
 def index(request: Request):
-    return templates.TemplateResponse(request, "index.html")
+    return templates.TemplateResponse(request, "index.html", {
+        "chunk_count": collection.count()
+    })
 
 @app.post("/ask-ui")
 def ask_ui(request: Request, question: str = Form(...)):
@@ -25,6 +28,8 @@ def ask_ui(request: Request, question: str = Form(...)):
         "question": question,
         "answer": result["answer"],
         "sources": result["sources"],
+        "model": result["model"],
+        "total_tokens": result["input_tokens"] + result["output_tokens"]
     })
 
 @app.post("/ask", response_model=AskResponse)

@@ -1,6 +1,7 @@
 
 from dotenv import load_dotenv
 from anthropic import Anthropic
+import markdown as md_lib
 
 load_dotenv()
 
@@ -38,7 +39,10 @@ def generate_answer(question: str, retrieved_chunks: list[dict]) -> dict:
     if not retrieved_chunks:
         return {
             "answer": "I don't have enough information in the provided documentation to answer that.",
-            "sources": []
+            "sources": [],
+            "model": "claude-haiku-4-5-20251001",
+            "input_tokens": 0,
+            "output_tokens": 0
         }
 
     prompt = build_prompt(question, retrieved_chunks)
@@ -53,6 +57,7 @@ def generate_answer(question: str, retrieved_chunks: list[dict]) -> dict:
     )
 
     answer_text = response.content[0].text
+    answer_html = md_lib.markdown(answer_text, extensions=["fenced_code"])
 
     seen = set()
     sources = []
@@ -62,9 +67,13 @@ def generate_answer(question: str, retrieved_chunks: list[dict]) -> dict:
             seen.add(key)
             sources.append({'title': chunk["title"], "source_path": chunk["source_path"]})
 
+
     return {
-        "answer": answer_text,
+        "answer": answer_html,
         "sources": sources,
+        "model": "claude-haiku-4-5",
+        "input_tokens": response.usage.input_tokens,
+        "output_tokens": response.usage.output_tokens
     }
 
 

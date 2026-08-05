@@ -1,0 +1,90 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Inter", system-ui, sans-serif;
+}
+
+.aurora-bg {
+    position: fixed;
+    inset: -20%;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 20% 30%, rgba(138, 224, 203, 0.22), transparent 40%),
+        radial-gradient(circle at 80% 20%, rgba(147, 130, 219, 0.2), transparent 45%),
+        radial-gradient(circle at 50% 80%, rgba(219, 130, 160, 0.16), transparent 45%),
+        radial-gradient(circle at 10% 90%, rgba(130, 170, 219, 0.18), transparent 40%);
+    filter: blur(70px);
+    animation: drift 26s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes drift {
+    0%   { transform: translate(0%, 0%) rotate(0deg) scale(1); }
+    50%  { transform: translate(3%, -4%) rotate(8deg) scale(1.08); }
+    100% { transform: translate(-4%, 3%) rotate(-6deg) scale(1.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aurora-bg { animation: none; }
+}
+
+.no-wrap-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a42 transparent;
+}
+
+.htmx-indicator {
+    display: none;
+}
+.htmx-request .htmx-indicator {
+    display: flex;
+}
+.htmx-request.htmx-indicator {
+    display: flex;
+}
+
+.dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #8ae0cb;
+    animation: bounce 1.2s infinite ease-in-out;
+}
+.dot:nth-child(2) { animation-delay: 0.15s; }
+.dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-4px); opacity: 1; }
+}
+
+.prose-answer p {
+    margin: 0 0 14px;
+}
+.prose-answer p:last-child {
+    margin-bottom: 0;
+}
+.prose-answer strong {
+    color: #fff;
+    font-weight: 600;
+}
+.prose-answer pre {
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 11px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 14px 0;
+}
+.prose-answer code {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 12.5px;
+    line-height: 22px;
+    color: #c9c9d2;
+}
+.prose-answer pre code {
+    color: #8ae0cb;
+}
