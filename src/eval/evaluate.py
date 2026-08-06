@@ -1,8 +1,11 @@
+import os
+from anthropic import Anthropic
 
 from src.eval.testset import EVAL_QUESTIONS
 from src.retrieval.retriever import retrieve
 from src.generation.generator import generate_answer
-from src.generation.generator import client
+
+client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 
 def check_retrieval(question_data: dict, retrieved_chunks: list[dict]) -> bool:
     expected_source = question_data["expected_source"]
