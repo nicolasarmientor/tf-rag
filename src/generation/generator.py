@@ -2,10 +2,13 @@
 from dotenv import load_dotenv
 from anthropic import Anthropic
 import markdown as md_lib
+import os
+import bleach
+
+ALLOWED_TAGS = ["p", "strong", "em", "code", "pre", "ul", "ol", "li", "br", "a"]
+ALLOWED_ATTRS = {"a": ["href"]}
 
 load_dotenv()
-
-client = Anthropic()
 
 SYSTEM_PROMPT = """You are a documentation assistant that answers questions about TensorFlow based solely on the provided context.
 
@@ -14,7 +17,6 @@ Rules:
 - If the context does not contain enough information to answer, say "I don't have enough information in the provided documentation to answer that".
 - When you answer, mention which source(s) you used, by their title.
 - Do not use any outside knowledge about TensorFlow beyond what is in the context.
-- Do not use markdown formatting (no #, **, bullet points with -, etc). Write plain sentences and pragraphs only.
 """
 
 def build_prompt(question: str, retrieved_chunks:list[dict]) -> str:
@@ -35,7 +37,18 @@ Answer based only on the context above."""
 
     return prompt
 
-def generate_answer(question: str, retrieved_chunks: list[dict]) -> dict:
+def generate_answer(question: str, retrieved_chunks: list[dict], user_api_key: str = None) -> dict:
+    key = user_api_key or os.environ.get("ANTHROPIC_API_KEY")
+    if not key:
+        return {
+            "answer": "Please enter your Anthropic API key above to ask a question.",
+            "sources": [],
+            "model": "",
+            "input_tokens": 0,
+            "output_tokens": 0
+        }
+    client = Anthropic(api_key=key)
+
     if not retrieved_chunks:
         return {
             "answer": "I don't have enough information in the provided documentation to answer that.",
@@ -57,14 +70,15 @@ def generate_answer(question: str, retrieved_chunks: list[dict]) -> dict:
     )
 
     answer_text = response.content[0].text
-    answer_html = md_lib.markdown(answer_text, extensions=["fenced_code"])
-
+    raw_html = md_lib.markdown(answer_text, extensions=["fenced_code"])
+    answer_html = bleach.clean(raw_html, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRS, strip=True)
+    
     seen = set()
     sources = []
     for chunk in retrieved_chunks:
-        key = chunk["source_path"]
-        if key not in seen:
-            seen.add(key)
+        source_key = chunk["source_path"]
+        if source_key not in seen:
+            seen.add(source_key)
             sources.append({'title': chunk["title"], "source_path": chunk["source_path"]})
 
 

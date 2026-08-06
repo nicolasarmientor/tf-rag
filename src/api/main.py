@@ -20,9 +20,18 @@ def index(request: Request):
     })
 
 @app.post("/ask-ui")
-def ask_ui(request: Request, question: str = Form(...)):
+def ask_ui(request: Request, question: str = Form(...), api_key: str = Form(None)):
+    if not api_key:
+        return templates.TemplateResponse(request, "answer.html", {
+            "question": question,
+            "answer": "Please enter your Anthropic API key above to ask a question.",
+            "sources": [],
+            "model": "",
+            "total_tokens": 0
+        })
+
     chunks = retrieve(question, top_k=5)
-    result = generate_answer(question, chunks)
+    result = generate_answer(question, chunks, user_api_key=api_key)
 
     return templates.TemplateResponse(request, "answer.html", {
         "question": question,
