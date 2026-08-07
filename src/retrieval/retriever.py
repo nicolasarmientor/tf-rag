@@ -1,12 +1,10 @@
 
-from src.ingest.embed import model
 from src.retrieval.vector_store import query_chunks
 
 DISTANCE_THRESHOLD = 1.3
 
 def retrieve(question: str, top_k: int = 5):
-    query_embedding = model.encode(question)
-    results = query_chunks(query_embedding, top_k=top_k)
+    results = query_chunks(question, top_k=top_k)
 
     documents = results["documents"][0]
     metadatas = results["metadatas"][0]

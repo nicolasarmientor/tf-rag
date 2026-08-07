@@ -1,3 +1,13 @@
+---
+title: TF-RAG
+emoji: 🔎
+colorFrom: gray
+colorTo: blue
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # TensorFlow-RAG
 
 ![CI](https://github.com/nicolasarmientor/tf-rag/actions/workflows/ci.yml/badge.svg)
