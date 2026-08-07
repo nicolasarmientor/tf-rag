@@ -21,24 +21,88 @@ A small, complete RAG system built to explore the full pipeline end to end rathe
 
 ---
 
-## Pipeline 
+## Architecture
 
-<!--
-  Add the pipeline diagram here, e.g.:
-  ![Pipeline diagram](docs/pipeline-diagram.png)
--->
-_Diagram TBD — ingestion (load → chunk → embed → store) and query (embed question → retrieve → generate → sanitize → render) flow._
+```mermaid
+flowchart TD
+
+subgraph group_ingestion["Offline indexing"]
+  node_docs["TensorFlow docs tree<br/>external source"]
+  node_loader["Document loader<br/>ingestion<br/>[loader.py]"]
+  node_chunker["Token-aware chunker<br/>ingestion<br/>[chunker.py]"]
+  node_vector_store["Vector-store builder<br/>indexing<br/>[vector_store.py]"]
+  node_chroma[("ChromaDB + ONNX embeddings<br/>vector database")]
+  node_docker["Image build<br/>container build"]
+end
+
+subgraph group_serving["Serving"]
+  node_api["FastAPI application<br/>API server<br/>[main.py]"]
+  node_schemas["API contracts<br/>schemas<br/>[schemas.py]"]
+  node_retriever["Threshold retriever<br/>retrieval<br/>[retriever.py]"]
+  node_generator["Grounded generator<br/>generation<br/>[generator.py]"]
+  node_anthropic{{"Anthropic Claude<br/>external LLM"}}
+  node_browser["Browser + HTMX<br/>web client"]
+  node_templates["Server-rendered templates<br/>HTML templates<br/>[index.html]"]
+end
+
+subgraph group_evaluation["Testing &amp; evaluation"]
+  node_tests["Unit tests<br/>[test_retrieval.py]"]
+  node_testset["Evaluation test set<br/>test data<br/>[testset.py]"]
+  node_evaluation_runner["Evaluation runner<br/>[evaluate.py]"]
+  node_ci["CI workflow<br/>[ci.yml]"]
+end
+
+node_docs -->|"loads"| node_loader
+node_loader -->|"documents"| node_chunker
+node_chunker -->|"chunks + metadata"| node_vector_store
+node_vector_store -->|"embeds and persists"| node_chroma
+node_docker -->|"fetches"| node_docs
+node_docker -->|"builds index"| node_vector_store
+node_browser -->|"POST /ask-ui"| node_api
+node_api -->|"uses"| node_schemas
+node_api -->|"renders"| node_templates
+node_api -->|"asks"| node_retriever
+node_retriever -->|"top-k query"| node_chroma
+node_api -->|"chunks + question"| node_generator
+node_generator -->|"constrained prompt"| node_anthropic
+node_testset -->|"questions and references"| node_evaluation_runner
+node_evaluation_runner -.->|"tests source retrieval"| node_retriever
+node_evaluation_runner -.->|"tests answers"| node_generator
+node_evaluation_runner -->|"judges answers"| node_anthropic
+node_ci -->|"runs"| node_tests
+node_tests -->|"unit tests"| node_chunker
+
+click node_loader "https://github.com/nicolasarmientor/tf-rag/blob/main/src/ingest/loader.py"
+click node_chunker "https://github.com/nicolasarmientor/tf-rag/blob/main/src/ingest/chunker.py"
+click node_vector_store "https://github.com/nicolasarmientor/tf-rag/blob/main/src/retrieval/vector_store.py"
+click node_docker "https://github.com/nicolasarmientor/tf-rag/blob/main/Dockerfile"
+click node_api "https://github.com/nicolasarmientor/tf-rag/blob/main/src/api/main.py"
+click node_schemas "https://github.com/nicolasarmientor/tf-rag/blob/main/src/api/schemas.py"
+click node_retriever "https://github.com/nicolasarmientor/tf-rag/blob/main/src/retrieval/retriever.py"
+click node_generator "https://github.com/nicolasarmientor/tf-rag/blob/main/src/generation/generator.py"
+click node_templates "https://github.com/nicolasarmientor/tf-rag/blob/main/src/api/templates/index.html"
+click node_tests "https://github.com/nicolasarmientor/tf-rag/blob/main/tests/test_retrieval.py"
+click node_testset "https://github.com/nicolasarmientor/tf-rag/blob/main/src/eval/testset.py"
+click node_evaluation_runner "https://github.com/nicolasarmientor/tf-rag/blob/main/src/eval/evaluate.py"
+click node_ci "https://github.com/nicolasarmientor/tf-rag/blob/main/.github/workflows/ci.yml"
+
+classDef toneNeutral fill:#f8fafc,stroke:#334155,stroke-width:1.5px,color:#0f172a
+classDef toneBlue fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px,color:#172554
+classDef toneAmber fill:#fef3c7,stroke:#d97706,stroke-width:1.5px,color:#78350f
+classDef toneMint fill:#dcfce7,stroke:#16a34a,stroke-width:1.5px,color:#14532d
+classDef toneRose fill:#ffe4e6,stroke:#e11d48,stroke-width:1.5px,color:#881337
+classDef toneIndigo fill:#e0e7ff,stroke:#4f46e5,stroke-width:1.5px,color:#312e81
+classDef toneTeal fill:#ccfbf1,stroke:#0f766e,stroke-width:1.5px,color:#134e4a
+class node_docs,node_loader,node_chunker,node_vector_store,node_chroma,node_docker toneBlue
+class node_api,node_schemas,node_retriever,node_generator,node_anthropic,node_browser,node_templates toneAmber
+class node_tests,node_testset,node_evaluation_runner,node_ci toneMint
+```
 
 ---
 
 ## Demo / Preview 
 
 ![demo](docs/demo.gif)
-<!--
-  Add a short screen recording of the app here, e.g.:
-  https://github.com/user-attachments/assets/your-video-id
--->
-_Video TBD._
 
 ---
 
@@ -65,7 +129,8 @@ src/
 tests/            # unit tests (chunker)
 data/raw/guide/   # source docs (not committed — see setup below)
 chroma_data/      # persisted vector store (not committed — generated locally)
-Dockerfile        # self-contained image: installs deps, fetches docs, builds the vector store at build time
+Dockerfile        # self-contained image: installs deps, fetches docs, builds the vector store 
+                  at build time
 ```
 
 ---
