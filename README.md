@@ -1,19 +1,11 @@
----
-title: TF-RAG
-emoji: 🔎
-colorFrom: gray
-colorTo: blue
-sdk: docker
-app_port: 8000
-pinned: false
----
-
 # TensorFlow-RAG
 
 ![CI](https://github.com/nicolasarmientor/tf-rag/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
 Retrieval-augmented Q&A over the [TensorFlow guide documentation](https://github.com/tensorflow/docs/tree/master/site/en/guide). Ask a question in plain English, get an answer grounded only in the ingested docs, with sources cited.
+
+**Live demo:** [tf-rag.onrender.com](https://tf-rag.onrender.com/) — bring your own Anthropic API key (see [Bring-your-own-key](#what-this-project-is-about) below). Free-tier hosting, so it spins down after 15 minutes idle; the first request after that takes ~30-60s to wake back up.
 
 ---
 
@@ -22,7 +14,7 @@ Retrieval-augmented Q&A over the [TensorFlow guide documentation](https://github
 A small, complete RAG system built to explore the full pipeline end to end rather than just call an LLM with some context stapled on:
 
 - **Structure-aware chunking** – splits documents by token count while never breaking a fenced code block across chunks, with token-based overlap between chunks for continuity.
-- **Local embeddings + vector search** – `sentence-transformers` (`all-MiniLM-L6-v2`) for embeddings, ChromaDB as the vector store.
+- **Local embeddings + vector search** – ChromaDB's bundled ONNX Runtime embedding function (`all-MiniLM-L6-v2`) for embeddings and as the vector store, so the whole thing runs without a GPU-flavored ML stack.
 - **Grounded generation** — Claude (via Anthropic's API) answers strictly from retrieved chunks, refusing to answer when nothing relevant is retrieved (distance-thresholded) instead of hallucinating.
 - **LLM-as-judge evaluation harness** — a hand-built question set checks both retrieval accuracy (did we fetch the right source doc) and answer accuracy (judged by a second Claude call against a reference summary), including negative examples that should be correctly refused.
 - **Bring-your-own-key** – the web UI never touches a server-side API key; each visitor supplies their own Anthropic key client-side, so the demo can be public without anyone spending your API budget.
@@ -54,11 +46,10 @@ _Video TBD._
 
 ```
 src/
-  ingest/        # load raw docs (.md / .ipynb), chunk them, embed chunks
+  ingest/        # load raw docs (.md / .ipynb), chunk them
     loader.py
     chunker.py
-    embed.py
-  retrieval/      # vector store (Chroma) + top-k retrieval
+  retrieval/      # vector store (Chroma, ONNX embeddings) + top-k retrieval
     vector_store.py
     retriever.py
   generation/     # prompt construction + Claude call + HTML sanitization
@@ -74,16 +65,18 @@ src/
 tests/            # unit tests (chunker)
 data/raw/guide/   # source docs (not committed — see setup below)
 chroma_data/      # persisted vector store (not committed — generated locally)
+Dockerfile        # self-contained image: installs deps, fetches docs, builds the vector store at build time
 ```
 
 ---
 
 ## Tech stack 
 
-- **Backend:** FastAPI, ChromaDB, sentence-transformers, tiktoken
+- **Backend:** FastAPI, ChromaDB (ONNX Runtime embeddings), tiktoken
 - **Frontend:** Jinja2, HTMX, Tailwind (CDN)
 - **Model:** Claude (Anthropic) for generation and as the eval judge
 - **Testing / CI:** pytest, GitHub Actions
+- **Deployment:** Docker, Render
 
 ---
 
@@ -134,6 +127,19 @@ Open `http://localhost:8000`, paste an Anthropic API key into the settings panel
 
 ---
 
+## Deployment
+
+The `Dockerfile` builds a self-contained image — it fetches the source docs and builds the vector store at image build time, so the container needs no external data or mounted volumes at runtime. It also runs as a non-root user and stays deliberately dependency-light (no torch), which keeps the running process to roughly **~180MB RAM**, comfortably inside free-tier limits:
+
+```bash
+docker build -t tf-rag .
+docker run -p 8000:8000 tf-rag
+```
+
+The live demo above is deployed on [Render](https://render.com)'s free tier (no billing card required), connected directly to this repo's `main` branch — pushing to `main` triggers a redeploy automatically. Render injects a `PORT` environment variable at runtime, which the Dockerfile's `CMD` already reads (`--port ${PORT:-8000}`), so no platform-specific changes were needed.
+
+---
+
 ## Usage
 
 1. Open the app and click the settings icon to paste in your Anthropic API key (stored only in your browser's session storage).
@@ -170,15 +176,18 @@ Requires `ANTHROPIC_API_KEY` in `.env`. Reports retrieval accuracy and answer ac
 - Retrieval applies a distance threshold rather than always returning the top-k results, so an irrelevant question yields no usable context and the model is forced to say so instead of answering from unrelated chunks.
 - Generated answer HTML is passed through `bleach` before being rendered, since it's model output being injected into a page.
 - The API key is intentionally never persisted server-side for the UI flow — see [BYOK support](src/generation/generator.py) — trading a bit of convenience for not being a custodian of anyone's API key.
+- Embeddings run through ChromaDB's bundled ONNX Runtime model instead of loading `sentence-transformers`/`torch` directly — same underlying `all-MiniLM-L6-v2` weights (verified the raw query distances are identical between the two), but without a multi-GB GPU-flavored dependency tree. Dropped idle memory from ~465MB to ~180MB, which is what makes free-tier hosting viable at all.
+- The Docker image runs as a non-root user, created and `chown`'d *after* the build-time steps that need to write into `/app` (copying source, cloning the docs, building the vector store) rather than before — switching users too early breaks those steps with permission errors. `HOME` is also pinned to `/app` for the whole image, so a cache written during the build (ChromaDB's ONNX model download) is still reachable once the container drops to the non-root user at runtime — otherwise the app would silently re-download that model on every cold start.
 
 ---
 
 ## Credits
 
 - Source documentation: [tensorflow/docs](https://github.com/tensorflow/docs)
-- Embedding model: [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2)
+- Embedding model: [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2), served via ChromaDB's bundled ONNX Runtime export
 - Generation & judge model: [Anthropic Claude](https://www.anthropic.com/)
 - Vector store: [ChromaDB](https://www.trychroma.com/)
+- Hosting: [Render](https://render.com)
 
 ---
 
