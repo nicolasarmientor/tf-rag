@@ -124,7 +124,7 @@ Open `http://localhost:8000`, paste an Anthropic API key into the settings panel
 
 ---
 
-## Usage 🧑‍💻
+## Usage
 
 1. Open the app and click the settings icon to paste in your Anthropic API key (stored only in your browser's session storage).
 2. Type a question about TensorFlow into the chat box (e.g. *"What is a Keras Sequential model?"*).
