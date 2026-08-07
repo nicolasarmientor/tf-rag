@@ -5,7 +5,7 @@
 
 Retrieval-augmented Q&A over the [TensorFlow guide documentation](https://github.com/tensorflow/docs/tree/master/site/en/guide). Ask a question in plain English, get an answer grounded only in the ingested docs, with sources cited.
 
-**Live demo:** [tf-rag.onrender.com](https://tf-rag.onrender.com/) — bring your own Anthropic API key (see [Bring-your-own-key](#what-this-project-is-about) below). Free-tier hosting, so it spins down after 15 minutes idle; the first request after that takes ~30-60s to wake back up.
+**Live demo:** [tf-rag.onrender.com](https://tf-rag.onrender.com/) – bring your own Anthropic API key (see [Bring-your-own-key](#what-this-project-is-about) below). Free-tier hosting, so it spins down after 15 minutes idle; the first request after that takes ~30-60s to wake back up.
 
 ---
 
@@ -33,10 +33,10 @@ _Diagram TBD — ingestion (load → chunk → embed → store) and query (embed
 
 ## Demo / Preview 
 
+![demo](docs/demo.gif)
 <!--
   Add a short screen recording of the app here, e.g.:
   https://github.com/user-attachments/assets/your-video-id
-  or embed a GIF: ![demo](docs/demo.gif)
 -->
 _Video TBD._
 
