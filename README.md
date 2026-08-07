@@ -1,7 +1,6 @@
 # TensorFlow-RAG
 
 ![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/nicolasarmientor/tf-rag)
 ![CI](https://github.com/nicolasarmientor/tf-rag/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
