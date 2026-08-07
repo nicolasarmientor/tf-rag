@@ -1,5 +1,7 @@
 # TensorFlow-RAG
 
+![Python 3.13](https://img.shields.io/badge/python-3.13-blue.svg)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/nicolasarmientor/tf-rag)
 ![CI](https://github.com/nicolasarmientor/tf-rag/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
@@ -18,6 +20,12 @@ A small, complete RAG system built to explore the full pipeline end to end rathe
 - **Grounded generation** — Claude (via Anthropic's API) answers strictly from retrieved chunks, refusing to answer when nothing relevant is retrieved (distance-thresholded) instead of hallucinating.
 - **LLM-as-judge evaluation harness** — a hand-built question set checks both retrieval accuracy (did we fetch the right source doc) and answer accuracy (judged by a second Claude call against a reference summary), including negative examples that should be correctly refused.
 - **Bring-your-own-key** – the web UI never touches a server-side API key; each visitor supplies their own Anthropic key client-side, so the demo can be public without anyone spending your API budget.
+
+---
+
+## Demo / Preview 
+
+![demo](docs/demo.gif)
 
 ---
 
@@ -97,12 +105,6 @@ class node_docs,node_loader,node_chunker,node_vector_store,node_chroma,node_dock
 class node_api,node_schemas,node_retriever,node_generator,node_anthropic,node_browser,node_templates toneAmber
 class node_tests,node_testset,node_evaluation_runner,node_ci toneMint
 ```
-
----
-
-## Demo / Preview 
-
-![demo](docs/demo.gif)
 
 ---
 
